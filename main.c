@@ -24,17 +24,17 @@ int main(int argc, char *argv[]) {
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
 
     if (server_socket == -1) {
-        printf("Can't allocate server_socket");
+        printf("Can't allocate server_socket\n");
         exit(1);
     }
 
     if (bind(server_socket, (const struct sockaddr *) &server_addr, sizeof(server_addr)) == -1) {
-        printf("Bind Error");
+        printf("Bind Error\n");
         exit(1);
     }
 
     if (listen(server_socket, 5) == -1) {
-        printf("Listen Error");
+        printf("Listen Error\n");
         exit(1);
     }
 
@@ -45,57 +45,43 @@ int main(int argc, char *argv[]) {
         client_socket = accept(server_socket, (struct sockaddr *) &client_addr, &client_addr_size);
 
         if (client_socket == -1) {
-            printf("Connect Error");
-            close(server_socket);
+            printf("Connect Error\n");
+            close(client_socket);
             exit(1);
         }
 
+        // receive filename
         if (recv(client_socket, filename, BUFFSIZE, 0) == -1) {
-            printf("Can't receive filename");
-            exit(1);
+            printf("Can't receive filename\n");
         }
 
-        fp = fopen(filename, "wb");
-
-        if (fp == NULL) {
-            printf("Can't open file");
-            exit(1);
+        // write file
+        if ((fp = fopen(filename, "wb")) == NULL) {
+            printf("Can't open file\n");
         }
-        while (1) {
-            if (receive_file(client_socket, fp) == 0) {
-                break;
+
+        receive_file(client_socket, fp);
+
+        // file save or empty file erase
+        if (fp != NULL) {
+            fseek(fp, 0, SEEK_END);
+            if (ftell(fp) != 0) {
+                printf("%s Receive Success\n", filename);
+                fclose(fp);
+            }
+            else {
+                remove(filename);
             }
         }
-        printf("%s Receive File Success", filename);
-        printf("%s Receive File Success", filename);
-        printf("%s Receive File Success", filename);
-        printf("%s Receive File Success", filename);
-        printf("%s Receive File Success", filename);
-        printf("%s Receive File Success", filename);
-        printf("%s Receive File Success", filename);
-        printf("%s Receive File Success", filename);
-        printf("%s Receive File Success", filename);
-
-        fclose(fp);
+        fflush(stdout);
         close(client_socket);
     }
 }
 
-int receive_file(int sockfd, FILE *fp) {
-    printf("asdsadada");
+void receive_file(int sockfd, FILE *fp) {
     ssize_t n;
     char buff[BUFFSIZE] = {0};
     while ((n = recv(sockfd, buff, BUFFSIZE, 0)) > 0) {
-        if (n == -1) {
-            printf("Receive File Error");
-            exit(1);
-        }
-
-        if (fwrite(buff, sizeof(char), n, fp) != n) {
-            printf("Receive File Error");
-            exit(1);
-        }
-        memset(buff, 0, BUFFSIZE);
+        fwrite(buff, sizeof(char), n, fp);
     }
-    return 0;
 }

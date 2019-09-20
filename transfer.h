@@ -4,6 +4,6 @@
 #define SERVERPORT 8877
 #define BUFFSIZE 4096
 
-int receive_file(int sockfd, FILE *fp);
+void receive_file(int sockfd, FILE *fp);
 
 #endif

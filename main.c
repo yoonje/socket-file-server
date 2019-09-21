@@ -50,19 +50,16 @@ int main(int argc, char *argv[]) {
             exit(1);
         }
 
-        // receive filename
         if (recv(client_socket, filename, BUFFSIZE, 0) == -1) {
             printf("Can't receive filename\n");
         }
 
-        // write file
         if ((fp = fopen(filename, "wb")) == NULL) {
             printf("Can't open file\n");
         }
 
         receive_file(client_socket, fp);
 
-        // file save or empty file erase
         if (fp != NULL) {
             fseek(fp, 0, SEEK_END);
             if (ftell(fp) != 0) {
